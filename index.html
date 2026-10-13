@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUSIA + COMPUR | Painel Participativo</title>
+
+  <style>
+    :root {
+      --primary: #2a4681;
+      --primary-light: #eaf3ef;
+      --accent: #c58a42;
+      --text: #25332f;
+      --muted: #66736e;
+      --border: #dce4df;
+      --background: #f5f7f5;
+      --white: #ffffff;
+      --danger: #a33a32;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+    }
+
+    .page {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 28px 20px 48px;
+    }
+
+    header {
+      padding: 30px;
+      margin-bottom: 24px;
+      border-radius: 18px;
+      color: white;
+      background: var(--primary);
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: #d8e8df;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(25px, 4vw, 36px);
+      line-height: 1.2;
+    }
+
+    header p {
+      max-width: 820px;
+      margin: 0;
+      color: #eef4f0;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .panel,
+    .question,
+    .synthesis {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    .panel {
+      padding: 24px;
+    }
+
+    .intro {
+      margin: 0 0 22px;
+      color: var(--muted);
+    }
+
+    .question {
+      margin-bottom: 18px;
+      padding: 20px;
+    }
+
+    .question legend {
+      display: block;
+      width: 100%;
+      padding: 0;
+      margin-bottom: 5px;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .question-description {
+      margin: 0 0 15px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: #fff;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .option:hover {
+      background: #f7faf8;
+      border-color: #9db8ad;
+    }
+
+    .option:has(input:checked) {
+      background: var(--primary-light);
+      border-color: var(--primary);
+    }
+
+    .option input {
+      flex: 0 0 auto;
+      margin-top: 4px;
+      accent-color: var(--primary);
+    }
+
+    .option.disabled-option {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .other-field {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .other-field.visible {
+      display: block;
+    }
+
+    .other-field label,
+    .field-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #cbd6d0;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: 2px solid #a8c9ba;
+      border-color: var(--primary);
+    }
+
+    textarea {
+      min-height: 105px;
+      resize: vertical;
+    }
+
+    .counter {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .limit-warning {
+      display: none;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .limit-warning.visible {
+      display: block;
+    }
+
+    .required-mark {
+      color: var(--danger);
+    }
+
+    .form-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    button {
+      padding: 12px 18px;
+      border: 0;
+      border-radius: 9px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary-button {
+      color: white;
+      background: var(--primary);
+    }
+
+    .primary-button:hover {
+      background: #103a34;
+    }
+
+    .secondary-button {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .status-message {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .status-message.success {
+      display: block;
+      color: #20523d;
+      background: #e8f5ec;
+    }
+
+    .status-message.error {
+      display: block;
+      color: #8d2f2a;
+      background: #fbeceb;
+    }
+
+    aside {
+      position: sticky;
+      top: 20px;
+    }
+
+    .synthesis {
+      padding: 21px;
+    }
+
+    .synthesis h2 {
+      margin: 0 0 5px;
+      font-size: 19px;
+    }
+
+    .synthesis-description {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .total-number {
+      margin: 0;
+      color: var(--primary);
+      font-size: 42px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .total-label {
+      margin: 4px 0 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .bar-item {
+      margin: 16px 0;
+    }
+
+    .bar-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+
+    .bar-label {
+      overflow-wrap: anywhere;
+    }
+
+    .bar-count {
+      flex: 0 0 auto;
+      font-weight: 700;
+    }
+
+    .bar-track {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 20px;
+      background: #edf1ee;
+    }
+
+    .bar-fill {
+      width: 0;
+      height: 100%;
+      border-radius: 20px;
+      background: var(--accent);
+      transition: width 0.25s ease;
+    }
+
+    .empty-synthesis {
+      padding: 12px;
+      border-radius: 8px;
+      color: var(--muted);
+      background: #f6f8f6;
+      font-size: 13px;
+    }
+
+    .footer-note {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    @media (max-width: 850px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        position: static;
+        grid-row: 1;
+      }
+
+      .options {
+        grid-template-columns: 1fr;
+      }
+
+      .page {
+        padding: 16px 12px 32px;
+      }
+
+      header,
+      .panel {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <header>
+      <p class="eyebrow">Subsecretaria de Transformação Digital e Desenvolvimento Institucional - SSTDI/SMU</p>
+      <h1>LUSIA Território</h1>
+      <p>
+        A cidade em dados. O território em perspectiva.
+      <p>
+      <p>Ajude a definir quais informações devem ser priorizadas para ampliar a transparência do licenciamento urbano e ambiental de Niterói e fortalecer um planejamento urbano mais estratégico.</p>
+    </header>
+
+    <div class="layout">
+      <section class="panel">
+        <p class="intro"></p>
+        <form id="f" novalidate>
+          <fieldset class="question" data-group="segmento" data-max="1" data-required="true">
+            <legend>1. Qual segmento você representa? <span class="required-mark">*</span></legend>
+            <p class="question-description">Selecione apenas uma alternativa.</p>
+
+            <div class="options">
+              <label class="option"><input type="checkbox" name="segmento" value="Entidades Profissionais e Acadêmicas"><span>Entidades Profissionais e Acadêmicas</span></label>
+              <label class="option"><input type="checkbox" name="segmento" value="Movimentos Populares e Sociais"><span>Movimentos Populares e Sociais</span></label>
+              <label class="option"><input type="checkbox" name="segmento" value="Poder Executivo"><span>Poder Executivo</span></label>
+              <label class="option"><input type="checkbox" name="segmento" value="Poder Legislativo"><span>Poder Legislativo</span></label>
+              <label class="option"><input type="checkbox" name="segmento" value="Setor Empresarial"><span>Setor Empresarial</span></label>
+              <label class="option"><input type="checkbox" name="segmento" value="Trabalhadores"><span>Trabalhadores</span></label>
+              <label class="option"><input type="checkbox" name="segmento" value="Outros" data-other-trigger="segmento_outros"><span>Outros</span></label>
+            </div>
+
+            <div class="other-field" id="wrap-segmento_outros">
+              <label for="segmento_outros">Especifique o segmento <span class="required-mark">*</span></label>
+              <input type="text" id="segmento_outros" name="segmento_outros" placeholder="Informe o segmento que representa">
+            </div>
+
+            <div class="counter">Selecione 1 alternativa.</div>
+            <div class="limit-warning">Para trocar a alternativa, desmarque a opção atual.</div>
+          </fieldset>
+
+          <fieldset class="question" data-group="publico" data-max="3" data-required="true">
+            <legend>2. Quem deve ser prioritariamente beneficiado pelas informações do Observatório? <span class="required-mark">*</span></legend>
+            <p class="question-description">Selecione até três alternativas.</p>
+
+            <div class="options">
+              <label class="option"><input type="checkbox" name="publico" value="Moradores e cidadãos"><span>Moradores e cidadãos</span></label>
+              <label class="option"><input type="checkbox" name="publico" value="Conselhos e instâncias participativas"><span>Conselhos e instâncias participativas</span></label>
+              <label class="option"><input type="checkbox" name="publico" value="Profissionais de arquitetura e urbanismo"><span>Profissionais de arquitetura e urbanismo</span></label>
+              <label class="option"><input type="checkbox" name="publico" value="Empreendedores e setor imobiliário"><span>Empreendedores e setor imobiliário</span></label>
+              <label class="option"><input type="checkbox" name="publico" value="Pesquisadores e universidades"><span>Pesquisadores e universidades</span></label>
+              <label class="option"><input type="checkbox" name="publico" value="Órgãos públicos"><span>Órgãos públicos</span></label>
+              <label class="option"><input type="checkbox" name="publico" value="Organizações da sociedade civil"><span>Organizações da sociedade civil</span></label>
+              <label class="option"><input type="checkbox" name="publico" value="Outros" data-other-trigger="publico_outros"><span>Outros</span></label>
+            </div>
+
+            <div class="other-field" id="wrap-publico_outros">
+              <label for="publico_outros">Especifique o público</label>
+              <input type="text" id="publico_outros" name="publico_outros" placeholder="Informe outro público prioritário">
+            </div>
+
+            <div class="counter">0 de 3 alternativas selecionadas.</div>
+            <div class="limit-warning">Você atingiu o limite de três alternativas.</div>
+          </fieldset>
+
+          <fieldset class="question" data-group="dados" data-max="3">
+            <legend>3. Quais conjuntos de dados devem ser priorizados no Observatório?</legend>
+            <p class="question-description">Selecione até três alternativas.</p>
+
+            <div class="options">
+              <label class="option"><input type="checkbox" name="dados" value="Licenças e autorizações emitidas"><span>Licenças e autorizações emitidas</span></label>
+              <label class="option"><input type="checkbox" name="dados" value="Quantidade e situação dos processos"><span>Quantidade e situação dos processos</span></label>
+              <label class="option"><input type="checkbox" name="dados" value="Prazos e etapas do licenciamento"><span>Prazos e etapas do licenciamento</span></label>
+              <label class="option"><input type="checkbox" name="dados" value="Tipos de obras e empreendimentos"><span>Tipos de obras e empreendimentos</span></label>
+              <label class="option"><input type="checkbox" name="dados" value="Uso e ocupação do solo"><span>Uso e ocupação do solo</span></label>
+              <label class="option"><input type="checkbox" name="dados" value="Dados ambientais relacionados ao licenciamento"><span>Dados ambientais relacionados ao licenciamento</span></label>
+              <label class="option"><input type="checkbox" name="dados" value="Exigências, indeferimentos e motivos"><span>Exigências, indeferimentos e motivos</span></label>
+              <label class="option"><input type="checkbox" name="dados" value="Outros" data-other-trigger="dados_outros"><span>Outros</span></label>
+            </div>
+
+            <div class="other-field" id="wrap-dados_outros">
+              <label for="dados_outros">Especifique os dados</label>
+              <input type="text" id="dados_outros" name="dados_outros" placeholder="Quais dados deveriam ser incluídos?">
+            </div>
+
+            <div class="counter">0 de 3 alternativas selecionadas.</div>
+            <div class="limit-warning">Você atingiu o limite de três alternativas.</div>
+          </fieldset>
+
+          <fieldset class="question" data-group="indicadores" data-max="3">
+            <legend>4. Quais indicadores seriam mais úteis para acompanhar o licenciamento?</legend>
+            <p class="question-description">Selecione até três alternativas.</p>
+
+            <div class="options">
+              <label class="option"><input type="checkbox" name="indicadores" value="Tempo médio de análise"><span>Tempo médio de análise</span></label>
+              <label class="option"><input type="checkbox" name="indicadores" value="Número de processos por situação"><span>Número de processos por situação</span></label>
+              <label class="option"><input type="checkbox" name="indicadores" value="Licenças emitidas por período"><span>Licenças emitidas por período</span></label>
+              <label class="option"><input type="checkbox" name="indicadores" value="Distribuição territorial dos licenciamentos"><span>Distribuição territorial dos licenciamentos</span></label>
+              <label class="option"><input type="checkbox" name="indicadores" value="Principais motivos de exigências e indeferimentos"><span>Principais motivos de exigências e indeferimentos</span></label>
+              <label class="option"><input type="checkbox" name="indicadores" value="Evolução dos tipos de empreendimentos"><span>Evolução dos tipos de empreendimentos</span></label>
+              <label class="option"><input type="checkbox" name="indicadores" value="Outros" data-other-trigger="indicadores_outros"><span>Outros</span></label>
+            </div>
+
+            <div class="other-field" id="wrap-indicadores_outros">
+              <label for="indicadores_outros">Especifique os indicadores</label>
+              <input type="text" id="indicadores_outros" name="indicadores_outros" placeholder="Quais indicadores deveriam ser acompanhados?">
+            </div>
+
+            <div class="counter">0 de 3 alternativas selecionadas.</div>
+            <div class="limit-warning">Você atingiu o limite de três alternativas.</div>
+          </fieldset>
+
+          <fieldset class="question" data-group="territorio" data-max="3">
+            <legend>5. Qual nível de detalhamento territorial é mais importante?</legend>
+            <p class="question-description">Selecione até três alternativas.</p>
+
+            <div class="options">
+              <label class="option"><input type="checkbox" name="territorio" value="Município como um todo"><span>Município como um todo</span></label>
+              <label class="option"><input type="checkbox" name="territorio" value="Regiões de Planejamento"><span>Regiões de Planejamento</span></label>
+              <label class="option"><input type="checkbox" name="territorio" value="Bairros"><span>Bairros</span></label>
+              <label class="option"><input type="checkbox" name="territorio" value="Lotes e endereços, quando possível"><span>Lotes e endereços, quando possível</span></label>
+              <label class="option"><input type="checkbox" name="territorio" value="Zoneamento e parâmetros urbanísticos"><span>Zoneamento e parâmetros urbanísticos</span></label>
+              <label class="option"><input type="checkbox" name="territorio" value="Áreas de proteção e restrições ambientais"><span>Áreas de proteção e restrições ambientais</span></label>
+              <label class="option"><input type="checkbox" name="territorio" value="Outros" data-other-trigger="territorio_outros"><span>Outros</span></label>
+            </div>
+
+            <div class="other-field" id="wrap-territorio_outros">
+              <label for="territorio_outros">Especifique o detalhamento</label>
+              <input type="text" id="territorio_outros" name="territorio_outros" placeholder="Informe outro nível ou recorte territorial">
+            </div>
+
+            <div class="counter">0 de 3 alternativas selecionadas.</div>
+            <div class="limit-warning">Você atingiu o limite de três alternativas.</div>
+          </fieldset>
+
+          <fieldset class="question" data-group="formatos" data-max="3">
+            <legend>6. Como as informações devem ser apresentadas?</legend>
+            <p class="question-description">Selecione até três alternativas.</p>
+
+            <div class="options">
+              <label class="option"><input type="checkbox" name="formatos" value="Painéis e gráficos interativos"><span>Painéis e gráficos interativos</span></label>
+              <label class="option"><input type="checkbox" name="formatos" value="Mapas interativos"><span>Mapas interativos</span></label>
+              <label class="option"><input type="checkbox" name="formatos" value="Tabelas consultáveis"><span>Tabelas consultáveis</span></label>
+              <label class="option"><input type="checkbox" name="formatos" value="Relatórios periódicos"><span>Relatórios periódicos</span></label>
+              <label class="option"><input type="checkbox" name="formatos" value="Bases de dados abertas para download"><span>Bases de dados abertas para download</span></label>
+              <label class="option"><input type="checkbox" name="formatos" value="Séries históricas e comparações temporais"><span>Séries históricas e comparações temporais</span></label>
+              <label class="option"><input type="checkbox" name="formatos" value="Outros" data-other-trigger="formatos_outros"><span>Outros</span></label>
+            </div>
+
+            <div class="other-field" id="wrap-formatos_outros">
+              <label for="formatos_outros">Especifique o formato</label>
+              <input type="text" id="formatos_outros" name="formatos_outros" placeholder="Informe outra forma de apresentação">
+            </div>
+
+            <div class="counter">0 de 3 alternativas selecionadas.</div>
+            <div class="limit-warning">Você atingiu o limite de três alternativas.</div>
+          </fieldset>
+
+          <fieldset class="question" data-group="confiabilidade" data-max="3">
+            <legend>7. O que é essencial para garantir a confiabilidade das informações?</legend>
+            <p class="question-description">Selecione até três alternativas.</p>
+
+            <div class="options">
+              <label class="option"><input type="checkbox" name="confiabilidade" value="Indicação da fonte dos dados"><span>Indicação da fonte dos dados</span></label>
+              <label class="option"><input type="checkbox" name="confiabilidade" value="Data da última atualização"><span>Data da última atualização</span></label>
+              <label class="option"><input type="checkbox" name="confiabilidade" value="Metodologia de cálculo dos indicadores"><span>Metodologia de cálculo dos indicadores</span></label>
+              <label class="option"><input type="checkbox" name="confiabilidade" value="Histórico de alterações"><span>Histórico de alterações</span></label>
+              <label class="option"><input type="checkbox" name="confiabilidade" value="Glossário e definições dos termos"><span>Glossário e definições dos termos</span></label>
+              <label class="option"><input type="checkbox" name="confiabilidade" value="Possibilidade de conferir os dados de origem"><span>Possibilidade de conferir os dados de origem</span></label>
+              <label class="option"><input type="checkbox" name="confiabilidade" value="Outros" data-other-trigger="confiabilidade_outros"><span>Outros</span></label>
+            </div>
+
+            <div class="other-field" id="wrap-confiabilidade_outros">
+              <label for="confiabilidade_outros">Especifique os requisitos</label>
+              <input type="text" id="confiabilidade_outros" name="confiabilidade_outros" placeholder="Informe outro requisito de confiabilidade">
+            </div>
+
+            <div class="counter">0 de 3 alternativas selecionadas.</div>
+            <div class="limit-warning">Você atingiu o limite de três alternativas.</div>
+          </fieldset>
+
+          <fieldset class="question" data-group="prioridades" data-max="3">
+            <legend>8. Quais devem ser as prioridades para a implantação do Observatório?</legend>
+            <p class="question-description">Selecione até três alternativas.</p>
+
+            <div class="options">
+              <label class="option"><input type="checkbox" name="prioridades" value="Transparência sobre os processos de licenciamento"><span>Transparência sobre os processos de licenciamento</span></label>
+              <label class="option"><input type="checkbox" name="prioridades" value="Acompanhamento dos prazos e da tramitação"><span>Acompanhamento dos prazos e da tramitação</span></label>
+              <label class="option"><input type="checkbox" name="prioridades" value="Visualização territorial dos licenciamentos"><span>Visualização territorial dos licenciamentos</span></label>
+              <label class="option"><input type="checkbox" name="prioridades" value="Acesso a dados abertos"><span>Acesso a dados abertos</span></label>
+              <label class="option"><input type="checkbox" name="prioridades" value="Apoio à participação e ao controle social"><span>Apoio à participação e ao controle social</span></label>
+              <label class="option"><input type="checkbox" name="prioridades" value="Apoio ao planejamento e à gestão urbana"><span>Apoio ao planejamento e à gestão urbana</span></label>
+              <label class="option"><input type="checkbox" name="prioridades" value="Outros" data-other-trigger="prioridades_outros"><span>Outros</span></label>
+            </div>
+
+            <div class="other-field" id="wrap-prioridades_outros">
+              <label for="prioridades_outros">Especifique a prioridade</label>
+              <input type="text" id="prioridades_outros" name="prioridades_outros" placeholder="Informe outra prioridade">
+            </div>
+
+            <div class="counter">0 de 3 alternativas selecionadas.</div>
+            <div class="limit-warning">Você atingiu o limite de três alternativas.</div>
+          </fieldset>
+
+          <div class="question">
+            <label class="field-label" for="justificativa">
+              Comentários ou sugestões adicionais (opcional)
+            </label>
+            <textarea
+              id="justificativa"
+              name="justificativa"
+              placeholder="Registre sugestões, necessidades ou observações que não tenham sido contempladas nas perguntas."
+            ></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="primary-button">Registrar contribuição</button>
+            <button type="button" id="exportCsvButton" class="secondary-button">Encerrar coleta e exportar CSV</button>
+            <button type="reset" class="secondary-button">Limpar respostas</button>
+          </div>
+
+          <div id="status" class="status-message" role="status" aria-live="polite"></div>
+        </form>
+      </section>
+
+      <aside>
+        <section class="synthesis" aria-labelledby="synthesis-title">
+          <h2 id="synthesis-title">Síntese nesta sessão</h2>
+          <p class="synthesis-description">Acompanhamento das contribuições registradas neste navegador.</p>
+
+          <p class="total-number" id="total">0</p>
+          <p class="total-label">contribuições registradas</p>
+
+          <div class="empty-synthesis" id="emptySynthesis">
+            As prioridades aparecerão aqui após o registro das primeiras contribuições.
+          </div>
+
+          <div id="bars"></div>
+
+          <p class="footer-note">
+            Os indicadores refletem apenas os registros armazenados neste navegador.
+            Eles não representam uma consolidação automática de respostas de outros dispositivos.
+          </p>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const STORAGE_KEY = "lusia_compur_contribuicoes";
+      const DATE_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "medium",
+      });
+      const form = document.getElementById("f");
+      const status = document.getElementById("status");
+      const totalElement = document.getElementById("total");
+      const barsElement = document.getElementById("bars");
+      const emptySynthesis = document.getElementById("emptySynthesis");
+      const exportCsvButton = document.getElementById("exportCsvButton");
+
+      function readResponses() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          const parsed = stored ? JSON.parse(stored) : [];
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+          return [];
+        }
+      }
+
+      function saveResponses(responses) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(responses));
+          return true;
+        } catch (error) {
+          return false;
+        }
+      }
+
+      function downloadFile(filename, content, type) {
+        const blob = new Blob([content], { type });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = filename;
+        anchor.style.display = "none";
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        URL.revokeObjectURL(url);
+      }
+
+      function escapeCsv(value) {
+        const stringValue = value == null ? "" : String(value);
+        if (/[",\n]/.test(stringValue)) {
+          return `"${stringValue.replace(/"/g, '""')}"`;
+        }
+        return stringValue;
+      }
+
+      function flattenResponse(response) {
+        const flat = {};
+        Object.keys(response).forEach((key) => {
+          if (key === "id" || key === "data") return;
+          const value = response[key];
+          flat[key] = Array.isArray(value) ? value.join("; ") : value == null ? "" : value;
+        });
+        flat.data = response.data || "";
+        flat.id = response.id || "";
+        return flat;
+      }
+
+      function generateCsv(responses) {
+        const keys = new Set();
+        responses.forEach((response) => {
+          Object.keys(flattenResponse(response)).forEach((key) => keys.add(key));
+        });
+
+        const orderedKeys = ["id", "data", ...Array.from(keys).filter((key) => key !== "id" && key !== "data")];
+        const header = orderedKeys.map(escapeCsv).join(",");
+
+        const rows = responses.map((response) => {
+          const flat = flattenResponse(response);
+          return orderedKeys.map((key) => escapeCsv(flat[key] || "")).join(",");
+        });
+
+        return [header, ...rows].join("\n");
+      }
+
+      function exportResponsesCsv() {
+        const responses = readResponses();
+
+        if (!responses.length) {
+          showStatus("Ainda não há respostas registradas para exportar.", "error");
+          return;
+        }
+
+        const csv = generateCsv(responses);
+        const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+        downloadFile(`respostas_lusia_compur_${stamp}.csv`, csv, "text/csv;charset=utf-8;");
+        showStatus("Arquivo CSV das respostas foi exportado com sucesso.", "success");
+      }
+
+      function getSelected(fieldset) {
+        return Array.from(
+          fieldset.querySelectorAll('input[type="checkbox"]:checked')
+        );
+      }
+
+      function updateGroup(fieldset) {
+        const max = Number(fieldset.dataset.max || 3);
+        const checkboxes = Array.from(
+          fieldset.querySelectorAll('input[type="checkbox"]')
+        );
+        const selected = getSelected(fieldset);
+        const counter = fieldset.querySelector(".counter");
+        const warning = fieldset.querySelector(".limit-warning");
+
+        checkboxes.forEach((checkbox) => {
+          const label = checkbox.closest(".option");
+          const atLimit = selected.length >= max;
+          const disableThis = atLimit && !checkbox.checked;
+
+          checkbox.disabled = disableThis;
+
+          if (label) {
+            label.classList.toggle("disabled-option", disableThis);
+          }
+        });
+
+        if (counter) {
+          if (max === 1) {
+            counter.textContent = `${selected.length} de 1 alternativa selecionada.`;
+          } else {
+            counter.textContent = `${selected.length} de ${max} alternativas selecionadas.`;
+          }
+        }
+
+        if (warning) {
+          warning.classList.toggle(
+            "visible",
+            selected.length >= max && max > 1
+          );
+        }
+
+        updateOtherFields(fieldset);
+      }
+
+      function updateOtherFields(fieldset) {
+        const checkboxes = Array.from(
+          fieldset.querySelectorAll('input[type="checkbox"][data-other-trigger]')
+        );
+
+        checkboxes.forEach((checkbox) => {
+          const targetId = checkbox.dataset.otherTrigger;
+          const target = document.getElementById(targetId);
+          const wrapper = document.getElementById(`wrap-${targetId}`);
+
+          if (!target || !wrapper) return;
+
+          const visible = checkbox.checked;
+          wrapper.classList.toggle("visible", visible);
+          target.required = visible;
+
+          if (!visible) {
+            target.value = "";
+          }
+        });
+      }
+
+      function showStatus(message, type) {
+        status.textContent = message;
+        status.className = `status-message ${type}`;
+      }
+
+      function validateForm() {
+        const fieldsets = Array.from(form.querySelectorAll(".question[data-group]"));
+
+        for (const fieldset of fieldsets) {
+          const groupName = fieldset.dataset.group;
+          const selected = getSelected(fieldset);
+          const max = Number(fieldset.dataset.max || 3);
+          const required = fieldset.dataset.required === "true";
+
+          if (required && selected.length === 0) {
+            const legend = fieldset.querySelector("legend");
+            showStatus(
+              `Responda à pergunta obrigatória: ${legend.textContent.trim()}`,
+              "error"
+            );
+            fieldset.scrollIntoView({ behavior: "smooth", block: "center" });
+            return false;
+          }
+
+          if (selected.length > max) {
+            showStatus(
+              `Na pergunta "${groupName}", selecione no máximo ${max} alternativa(s).`,
+              "error"
+            );
+            fieldset.scrollIntoView({ behavior: "smooth", block: "center" });
+            return false;
+          }
+
+          const otherCheckbox = fieldset.querySelector(
+            'input[type="checkbox"][data-other-trigger]:checked'
+          );
+
+          if (otherCheckbox) {
+            const otherId = otherCheckbox.dataset.otherTrigger;
+            const otherInput = document.getElementById(otherId);
+
+            if (otherInput && !otherInput.value.trim()) {
+              showStatus(
+                `Preencha o campo de especificação de "Outros" na pergunta ${groupName}.`,
+                "error"
+              );
+              otherInput.focus();
+              return false;
+            }
+          }
+        }
+
+        return true;
+      }
+
+      function collectResponse() {
+        const response = {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          data: new Date().toISOString()
+        };
+
+        const fieldsets = Array.from(form.querySelectorAll(".question[data-group]"));
+
+        fieldsets.forEach((fieldset) => {
+          const groupName = fieldset.dataset.group;
+          const selected = getSelected(fieldset);
+
+          response[groupName] = selected.map((checkbox) => checkbox.value);
+
+          const otherInput = document.querySelector(
+            `[name="${groupName}_outros"]`
+          );
+
+          response[`${groupName}_outros`] = otherInput
+            ? otherInput.value.trim()
+            : "";
+        });
+
+        response.justificativa = document.getElementById("justificativa").value.trim();
+        return response;
+      }
+
+      function renderSynthesis() {
+        const responses = readResponses();
+        totalElement.textContent = String(responses.length);
+
+        const counts = {};
+
+        responses.forEach((response) => {
+          const priorities = Array.isArray(response.prioridades)
+            ? response.prioridades
+            : [];
+
+          priorities.forEach((priority) => {
+            counts[priority] = (counts[priority] || 0) + 1;
+          });
+        });
+
+        barsElement.replaceChildren();
+
+        const entries = Object.entries(counts)
+          .sort((a, b) => b[1] - a[1]);
+
+        emptySynthesis.style.display = entries.length ? "none" : "block";
+
+        if (!entries.length) return;
+
+        const maxCount = Math.max(...entries.map((entry) => entry[1]), 1);
+
+        entries.forEach(([label, count]) => {
+          const item = document.createElement("div");
+          item.className = "bar-item";
+
+          const heading = document.createElement("div");
+          heading.className = "bar-heading";
+
+          const name = document.createElement("span");
+          name.className = "bar-label";
+          name.textContent = label;
+
+          const value = document.createElement("span");
+          value.className = "bar-count";
+          value.textContent = String(count);
+
+          heading.append(name, value);
+
+          const track = document.createElement("div");
+          track.className = "bar-track";
+          track.setAttribute("aria-label", `${label}: ${count} seleção(ões)`);
+
+          const fill = document.createElement("div");
+          fill.className = "bar-fill";
+          fill.style.width = `${(count / maxCount) * 100}%`;
+
+          track.appendChild(fill);
+          item.append(heading, track);
+          barsElement.appendChild(item);
+        });
+      }
+
+      exportCsvButton.addEventListener("click", exportResponsesCsv);
+
+      form.querySelectorAll(".question[data-group]").forEach((fieldset) => {
+        fieldset.addEventListener("change", (event) => {
+          if (event.target.matches('input[type="checkbox"]')) {
+            updateGroup(fieldset);
+            status.className = "status-message";
+          }
+        });
+
+        updateGroup(fieldset);
+      });
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        if (!validateForm()) return;
+
+        const response = collectResponse();
+        const responses = readResponses();
+        responses.push(response);
+
+        if (!saveResponses(responses)) {
+          showStatus(
+            "Não foi possível salvar a contribuição neste navegador. Verifique as configurações de armazenamento.",
+            "error"
+          );
+          return;
+        }
+
+        renderSynthesis();
+        form.reset();
+
+        form.querySelectorAll(".question[data-group]").forEach(updateGroup);
+
+        showStatus(
+          "Contribuição registrada. A síntese desta sessão foi atualizada.",
+          "success"
+        );
+
+        document.getElementById("synthesis-title").scrollIntoView({
+          behavior: "smooth",
+          block: "nearest"
+        });
+      });
+
+      form.addEventListener("reset", () => {
+        window.setTimeout(() => {
+          form.querySelectorAll(".question[data-group]").forEach(updateGroup);
+          status.className = "status-message";
+        }, 0);
+      });
+
+      renderSynthesis();
+    })();
+  </script>
+</body>
+</html>
